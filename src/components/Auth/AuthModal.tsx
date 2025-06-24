@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 interface AuthModalProps {
@@ -16,6 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
 
   const { signUp, signIn, resetPassword } = useAuth();
 
@@ -26,6 +27,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(null);
     setSuccess(null);
     setShowPassword(false);
+    setShowEmailConfirmation(false);
   };
 
   const handleModeChange = (newMode: 'signin' | 'signup' | 'reset') => {
@@ -56,9 +58,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         if (error) {
           setError(error.message);
         } else {
-          setSuccess('Account created successfully! You can now sign in.');
-          setMode('signin');
-          resetForm();
+          setShowEmailConfirmation(true);
         }
       } else if (mode === 'signin') {
         const { error } = await signIn(email, password);
@@ -83,7 +83,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleEmailConfirmationClose = () => {
+    setShowEmailConfirmation(false);
+    onClose();
+    resetForm();
+  };
+
   if (!isOpen) return null;
+
+  // Email Confirmation Pop-up
+  if (showEmailConfirmation) {
+    return (
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="bg-gradient-to-br from-green-900 to-teal-900 p-6 rounded-lg border border-green-500/50 max-w-md w-full">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-white font-bold text-xl mb-4">Check Your Email!</h2>
+            <div className="bg-black/30 p-4 rounded-lg mb-6">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Mail className="w-5 h-5 text-green-400" />
+                <span className="text-green-400 font-semibold">Confirmation Required</span>
+              </div>
+              <p className="text-white text-sm leading-relaxed mb-3">
+                We've sent a confirmation email to:
+              </p>
+              <p className="text-green-300 font-semibold text-sm mb-3">
+                {email}
+              </p>
+              <p className="text-gray-300 text-sm">
+                Please check your email and click the confirmation link to activate your account, then come back to sign in.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={handleEmailConfirmationClose}
+                className="w-full py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-bold rounded-lg hover:from-green-500 hover:to-teal-500 transition-all duration-200"
+              >
+                Got it! I'll check my email
+              </button>
+              
+              <p className="text-gray-400 text-xs">
+                Didn't receive the email? Check your spam folder or try signing up again.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
