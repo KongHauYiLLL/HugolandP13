@@ -52,8 +52,8 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin inline-block w-12 h-12 border-4 border-purple-400 border-t-transparent rounded-full mb-4"></div>
-          <p className="text-white text-xl font-semibold">Loading Hugoland...</p>
+          <div className="animate-spin inline-block w-8 h-8 sm:w-12 sm:h-12 border-4 border-purple-400 border-t-transparent rounded-full mb-4"></div>
+          <p className="text-white text-lg sm:text-xl font-semibold">Loading Hugoland...</p>
         </div>
       </div>
     );
@@ -62,16 +62,16 @@ function App() {
   // Show auth modal if user is not signed in
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">🏰 Welcome to Hugoland! 🗡️</h1>
-            <p className="text-purple-300 text-lg mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">🏰 Welcome to Hugoland! 🗡️</h1>
+            <p className="text-purple-300 text-base sm:text-lg mb-4 sm:mb-6">
               The ultimate fantasy adventure game where knowledge is your greatest weapon!
             </p>
-            <div className="bg-black/30 p-4 rounded-lg border border-purple-500/50 mb-6">
-              <h3 className="text-white font-bold mb-2">🎮 What awaits you:</h3>
-              <ul className="text-purple-200 text-sm space-y-1">
+            <div className="bg-black/30 p-3 sm:p-4 rounded-lg border border-purple-500/50 mb-4 sm:mb-6">
+              <h3 className="text-white font-bold mb-2 text-sm sm:text-base">🎮 What awaits you:</h3>
+              <ul className="text-purple-200 text-xs sm:text-sm space-y-1">
                 <li>• Answer trivia questions to defeat enemies</li>
                 <li>• Collect powerful weapons and armor</li>
                 <li>• Unlock achievements and build knowledge streaks</li>
@@ -83,13 +83,13 @@ function App() {
           
           <button
             onClick={() => setCurrentModal('auth')}
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-indigo-500 transition-all duration-200 flex items-center gap-3 mx-auto text-lg"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-indigo-500 transition-all duration-200 flex items-center gap-3 justify-center text-base sm:text-lg"
           >
-            <LogIn className="w-6 h-6" />
+            <LogIn className="w-5 h-5 sm:w-6 sm:h-6" />
             Start Your Adventure
           </button>
           
-          <p className="text-gray-400 text-sm mt-4">
+          <p className="text-gray-400 text-xs sm:text-sm mt-4">
             Sign in or create an account to begin your journey
           </p>
         </div>
@@ -125,7 +125,7 @@ function App() {
     switch (currentView) {
       case 'stats':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <PlayerStats
               playerStats={gameState.playerStats}
               zone={gameState.zone}
@@ -134,16 +134,16 @@ function App() {
             />
             
             {/* AFK Gem Info */}
-            <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-4 rounded-lg border border-purple-500/50">
+            <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-3 sm:p-4 rounded-lg border border-purple-500/50">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-2xl">💎</span>
-                  <h3 className="text-purple-400 font-bold text-lg">AFK Gem Mining</h3>
+                  <span className="text-xl sm:text-2xl">💎</span>
+                  <h3 className="text-purple-400 font-bold text-sm sm:text-lg">AFK Gem Mining</h3>
                 </div>
-                <p className="text-white text-sm">
+                <p className="text-white text-xs sm:text-sm">
                   Earn 2 gems every minute while the game is open!
                 </p>
-                <p className="text-purple-300 text-sm">
+                <p className="text-purple-300 text-xs sm:text-sm">
                   Keep Hugoland running to passively collect gems
                 </p>
               </div>
@@ -151,38 +151,38 @@ function App() {
             
             {/* Knowledge Streak Display */}
             {gameState.knowledgeStreak.current > 0 && (
-              <div className="bg-gradient-to-r from-yellow-900 to-orange-900 p-4 rounded-lg border border-yellow-500/50">
+              <div className="bg-gradient-to-r from-yellow-900 to-orange-900 p-3 sm:p-4 rounded-lg border border-yellow-500/50">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <span className="text-2xl">🔥</span>
-                    <h3 className="text-yellow-400 font-bold text-lg">Knowledge Streak!</h3>
+                    <span className="text-xl sm:text-2xl">🔥</span>
+                    <h3 className="text-yellow-400 font-bold text-sm sm:text-lg">Knowledge Streak!</h3>
                   </div>
-                  <p className="text-white text-sm">
+                  <p className="text-white text-xs sm:text-sm">
                     {gameState.knowledgeStreak.current} correct answers in a row
                   </p>
-                  <p className="text-yellow-300 text-sm">
+                  <p className="text-yellow-300 text-xs sm:text-sm">
                     +{Math.round((gameState.knowledgeStreak.multiplier - 1) * 100)}% reward bonus
                   </p>
                 </div>
               </div>
             )}
 
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-3 sm:space-y-4">
               <button
                 onClick={startCombat}
                 disabled={gameState.playerStats.hp <= 0}
-                className={`px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-white transition-all duration-200 transform flex items-center gap-3 mx-auto text-sm sm:text-base ${
+                className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-white transition-all duration-200 transform flex items-center gap-3 justify-center text-sm sm:text-base ${
                   gameState.playerStats.hp > 0
                     ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 hover:scale-105 shadow-lg hover:shadow-green-500/25'
                     : 'bg-gray-600 cursor-not-allowed'
                 }`}
               >
-                <Play className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
                 {gameState.playerStats.hp <= 0 ? 'You are defeated!' : 'Start Adventure'}
               </button>
               
               {gameState.playerStats.hp <= 0 && (
-                <p className="text-red-400 mt-2 text-sm">
+                <p className="text-red-400 mt-2 text-xs sm:text-sm">
                   Visit the shop to get better equipment and try again!
                 </p>
               )}
@@ -190,29 +190,29 @@ function App() {
               {gameState.isPremium && (
                 <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 p-3 rounded-lg">
                   <div className="flex items-center justify-center gap-2">
-                    <Crown className="w-5 h-5 text-white" />
-                    <span className="text-white font-bold">🎉 PREMIUM MEMBER UNLOCKED! 🎉</span>
+                    <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <span className="text-white font-bold text-xs sm:text-sm">🎉 PREMIUM MEMBER UNLOCKED! 🎉</span>
                   </div>
-                  <p className="text-yellow-100 text-sm mt-1">
+                  <p className="text-yellow-100 text-xs mt-1">
                     You've reached Zone 50! Enjoy exclusive rewards and special features!
                   </p>
                 </div>
               )}
               
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setCurrentModal('gameMode')}
-                  className="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 transition-all duration-200 flex items-center gap-2 text-sm"
+                  className="px-3 sm:px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 transition-all duration-200 flex items-center gap-2 justify-center text-xs sm:text-sm"
                 >
-                  <Settings className="w-4 h-4" />
+                  <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
                   Game Mode
                 </button>
                 
                 <button
                   onClick={resetGame}
-                  className="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center gap-2 text-sm"
+                  className="px-3 sm:px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center gap-2 justify-center text-xs sm:text-sm"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
                   Reset Game
                 </button>
               </div>
@@ -344,36 +344,36 @@ function App() {
 
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-800 via-violet-800 to-purple-800 shadow-2xl">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-6">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-white">
                 🏰 Hugoland 🗡️
               </h1>
               {gameState.isPremium && (
-                <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 animate-pulse" />
+                <Crown className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400 animate-pulse" />
               )}
             </div>
             
             {/* User Profile Button */}
             <button
               onClick={() => setCurrentModal('profile')}
-              className="flex items-center gap-2 px-3 py-2 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors"
             >
-              <User className="w-4 h-4 text-white" />
-              <span className="text-white text-sm font-semibold hidden sm:inline">
+              <User className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+              <span className="text-white text-xs sm:text-sm font-semibold hidden sm:inline">
                 {user.email?.split('@')[0]}
               </span>
             </button>
           </div>
           
           {/* Quick Stats Bar */}
-          <div className="flex justify-center items-center gap-4 mb-4 text-sm">
+          <div className="flex justify-center items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
             <button
               onClick={() => setCurrentModal('achievements')}
               className="flex items-center gap-1 text-yellow-300 hover:text-yellow-200 transition-colors"
             >
-              <Trophy className="w-4 h-4" />
+              <Trophy className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{unlockedAchievements}/{gameState.achievements.length}</span>
             </button>
             
@@ -381,7 +381,7 @@ function App() {
               onClick={() => setCurrentModal('collection')}
               className="flex items-center gap-1 text-indigo-300 hover:text-indigo-200 transition-colors"
             >
-              <Book className="w-4 h-4" />
+              <Book className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{gameState.collectionBook.totalWeaponsFound + gameState.collectionBook.totalArmorFound}</span>
             </button>
             
@@ -389,7 +389,7 @@ function App() {
               onClick={() => setCurrentModal('statistics')}
               className="flex items-center gap-1 text-blue-300 hover:text-blue-200 transition-colors"
             >
-              <BarChart3 className="w-4 h-4" />
+              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{Math.round((gameState.statistics.correctAnswers / Math.max(gameState.statistics.totalQuestionsAnswered, 1)) * 100)}%</span>
             </button>
           </div>
@@ -430,7 +430,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <div className="text-center py-4 text-gray-400 text-xs sm:text-sm px-4">
+      <div className="text-center py-3 sm:py-4 text-gray-400 text-xs sm:text-sm px-4">
         Welcome to{' '}
         <button
           onClick={(e) => {

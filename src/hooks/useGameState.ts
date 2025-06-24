@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { GameState, PlayerStats, Inventory, Enemy, Weapon, Armor, ChestReward, Research, Achievement, CollectionBook, KnowledgeStreak, GameMode, Statistics, PowerSkills, CheatSettings } from '../types/game';
 import { generateWeapon, generateArmor, generateEnemy, generateMythicalWeapon, generateMythicalArmor, calculateResearchBonus, calculateResearchCost } from '../utils/gameUtils';
 import { checkAchievements, initializeAchievements } from '../utils/achievements';
+import { useAnalytics } from './useAnalytics';
 import AsyncStorage from '../utils/storage';
 
 const STORAGE_KEY = 'hugoland_game_state';
@@ -122,6 +123,9 @@ export const useGameState = () => {
     showParticles: false,
     showScreenShake: false,
   });
+
+  // Initialize analytics hook
+  const { updateAnalytics } = useAnalytics(gameState);
 
   // Update play time
   useEffect(() => {
