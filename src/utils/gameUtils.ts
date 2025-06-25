@@ -80,7 +80,6 @@ export const generateMythicalWeapon = (): Weapon => {
 };
 
 export const generateArmor = (forceChroma = false): Armor => {
-  // Chroma items are now disabled
   const rarities = ['common', 'rare', 'epic', 'legendary'] as const;
   const weights = [45, 30, 20, 5];
   const random = Math.random() * 100;
@@ -120,8 +119,8 @@ export const generateMythicalArmor = (): Armor => {
   const names = armorNames.mythical;
   const name = names[Math.floor(Math.random() * names.length)];
   
-  const baseDef = 70 + Math.floor(Math.random() * 30); // 70-99 base defense
-  const sellPrice = Math.floor(baseDef * 5); // Higher sell price for mythical
+  const baseDef = 70 + Math.floor(Math.random() * 45); // 70-99 base defense
+  const sellPrice = Math.floor(baseDef * 10); // Higher sell price for mythical
 
   return {
     id: Math.random().toString(36).substr(2, 9),
@@ -129,7 +128,7 @@ export const generateMythicalArmor = (): Armor => {
     rarity: 'mythical',
     baseDef,
     level: 1,
-    upgradeCost: 100, // Expensive to upgrade
+    upgradeCost: 50, // Expensive to upgrade
     sellPrice,
     isChroma: false,
   };
