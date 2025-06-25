@@ -64,7 +64,7 @@ export const generateMythicalWeapon = (): Weapon => {
   const names = weaponNames.mythical;
   const name = names[Math.floor(Math.random() * names.length)];
   
-  const baseAtk = 100 + Math.floor(Math.random() * 50); // 100-149 base attack
+  const baseAtk = 100 + Math.floor(Math.random() * 75);
   const sellPrice = Math.floor(baseAtk * 15); // Higher sell price for mythical
 
   return {
@@ -73,7 +73,7 @@ export const generateMythicalWeapon = (): Weapon => {
     rarity: 'mythical',
     baseAtk,
     level: 1,
-    upgradeCost: 100, // Expensive to upgrade
+    upgradeCost: 50, // Expensive to upgrade
     sellPrice,
     isChroma: false,
   };
