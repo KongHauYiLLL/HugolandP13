@@ -3,9 +3,10 @@ import { GameState, PlayerStats, Inventory, Enemy, Weapon, Armor, ChestReward, R
 import { generateWeapon, generateArmor, generateEnemy, generateMythicalWeapon, generateMythicalArmor, calculateResearchBonus, calculateResearchCost } from '../utils/gameUtils';
 import { checkAchievements, initializeAchievements } from '../utils/achievements';
 import { useAnalytics } from './useAnalytics';
+import { useAuth } from './useAuth';
 import AsyncStorage from '../utils/storage';
 
-const STORAGE_KEY = 'hugoland_game_state';
+const STORAGE_KEY_PREFIX = 'hugoland_game_state_';
 
 const initialPlayerStats: PlayerStats = {
   hp: 200,
@@ -114,6 +115,7 @@ const initialGameState: GameState = {
 };
 
 export const useGameState = () => {
+  const { user } = useAuth();
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [isLoading, setIsLoading] = useState(true);
   const [visualEffects, setVisualEffects] = useState({
@@ -126,6 +128,12 @@ export const useGameState = () => {
 
   // Initialize analytics hook
   const { updateAnalytics } = useAnalytics(gameState);
+
+  // Get user-specific storage key
+  const getStorageKey = useCallback(() => {
+    if (!user?.id) return null;
+    return `${STORAGE_KEY_PREFIX}${user.id}`;
+  }, [user?.id]);
 
   // Update play time
   useEffect(() => {
@@ -142,11 +150,23 @@ export const useGameState = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Load game state from storage on mount
+  // Load game state from storage when user changes
   useEffect(() => {
     const loadGameState = async () => {
+      setIsLoading(true);
+      
       try {
-        const savedState = await AsyncStorage.getItem(STORAGE_KEY);
+        const storageKey = getStorageKey();
+        
+        if (!storageKey) {
+          // No user logged in, reset to initial state
+          setGameState(initialGameState);
+          setIsLoading(false);
+          return;
+        }
+
+        const savedState = await AsyncStorage.getItem(storageKey);
+        
         if (savedState) {
           const parsedState = JSON.parse(savedState);
           setGameState({
@@ -169,29 +189,51 @@ export const useGameState = () => {
             powerSkills: parsedState.powerSkills || initialPowerSkills,
             cheats: parsedState.cheats || initialCheats,
           });
+        } else {
+          // No saved state for this user, start fresh
+          setGameState({
+            ...initialGameState,
+            achievements: initializeAchievements(),
+            statistics: {
+              ...initialStatistics,
+              sessionStartTime: new Date(),
+            },
+          });
         }
       } catch (error) {
         console.error('Error loading game state:', error);
+        // On error, reset to initial state
+        setGameState({
+          ...initialGameState,
+          achievements: initializeAchievements(),
+          statistics: {
+            ...initialStatistics,
+            sessionStartTime: new Date(),
+          },
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadGameState();
-  }, []);
+  }, [getStorageKey, user?.id]);
 
-  // Save game state to storage whenever it changes
+  // Save game state to storage whenever it changes (but only if user is logged in)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && user?.id) {
       const saveGameState = async () => {
         try {
+          const storageKey = getStorageKey();
+          if (!storageKey) return;
+
           const stateToSave = {
             ...gameState,
             currentEnemy: null,
             inCombat: false,
             combatLog: [],
           };
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+          await AsyncStorage.setItem(storageKey, JSON.stringify(stateToSave));
         } catch (error) {
           console.error('Error saving game state:', error);
         }
@@ -199,7 +241,7 @@ export const useGameState = () => {
 
       saveGameState();
     }
-  }, [gameState, isLoading]);
+  }, [gameState, isLoading, user?.id, getStorageKey]);
 
   const triggerVisualEffect = useCallback((type: 'text' | 'particles' | 'shake', data?: any) => {
     switch (type) {
@@ -850,7 +892,11 @@ export const useGameState = () => {
 
   const resetGame = useCallback(async () => {
     try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
+      const storageKey = getStorageKey();
+      if (storageKey) {
+        await AsyncStorage.removeItem(storageKey);
+      }
+      
       setGameState({
         ...initialGameState,
         achievements: initializeAchievements(),
@@ -862,7 +908,7 @@ export const useGameState = () => {
     } catch (error) {
       console.error('Error resetting game:', error);
     }
-  }, []);
+  }, [getStorageKey]);
 
   return {
     gameState,
