@@ -65,7 +65,7 @@ export const generateMythicalWeapon = (): Weapon => {
   const name = names[Math.floor(Math.random() * names.length)];
   
   const baseAtk = 100 + Math.floor(Math.random() * 50); // 100-149 base attack
-  const sellPrice = Math.floor(baseAtk * 5); // Higher sell price for mythical
+  const sellPrice = Math.floor(baseAtk * 15); // Higher sell price for mythical
 
   return {
     id: Math.random().toString(36).substr(2, 9),
