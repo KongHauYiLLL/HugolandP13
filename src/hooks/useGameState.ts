@@ -644,7 +644,7 @@ export const useGameState = () => {
   }, [gameState.coins, gameState.knowledgeStreak.multiplier, gameState.cheats.infiniteCoins, updateCollectionBook, checkAndUnlockAchievements]);
 
   const purchaseMythical = useCallback((): { item: Weapon | Armor; type: 'weapon' | 'armor' } | null => {
-    const MYTHICAL_COST = 10000;
+    const MYTHICAL_COST = 50000;
     if (gameState.coins < MYTHICAL_COST && !gameState.cheats.infiniteCoins) return null;
 
     const isWeapon = Math.random() < 0.5;
