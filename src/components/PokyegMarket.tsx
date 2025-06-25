@@ -18,7 +18,7 @@ export const PokyegMarket: React.FC<PokyegMarketProps> = ({
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
-  const MYTHICAL_COST = 10000;
+  const MYTHICAL_COST = 50000;
 
   const handlePurchase = async () => {
     if (coins < MYTHICAL_COST) return;
