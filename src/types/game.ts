@@ -16,6 +16,7 @@ export interface GameState {
   statistics: Statistics;
   powerSkills: PowerSkills;
   cheats: CheatSettings;
+  mining: Mining;
 }
 
 export interface PlayerStats {
@@ -163,4 +164,24 @@ export interface CheatSettings {
   infiniteCoins: boolean;
   infiniteGems: boolean;
   obtainAnyItem: boolean;
+}
+
+export interface Mining {
+  efficiency: number; // How many clicks per mine action
+  tools: {
+    basic_pickaxe: boolean;
+    steel_pickaxe: boolean;
+    diamond_pickaxe: boolean;
+    mythical_pickaxe: boolean;
+  };
+  totalGemsMined: number;
+}
+
+export interface MiningTool {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  efficiency: number;
+  owned: boolean;
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useGameState } from './hooks/useGameState';
-import { useAuth } from './hooks/useAuth';
 import { Combat } from './components/Combat';
 import { Shop } from './components/Shop';
 import { Inventory } from './components/Inventory';
@@ -13,16 +12,14 @@ import { GameModeSelector } from './components/GameModeSelector';
 import { PokyegMarket } from './components/PokyegMarket';
 import { Tutorial } from './components/Tutorial';
 import { CheatPanel } from './components/CheatPanel';
-import { AuthModal } from './components/Auth/AuthModal';
-import { UserProfile } from './components/Auth/UserProfile';
+import { Mining } from './components/Mining';
 import { FloatingText, ScreenShake } from './components/VisualEffects';
-import { Shield, Package, User, Play, RotateCcw, Brain, Crown, Trophy, Book, BarChart3, Settings, LogIn } from 'lucide-react';
+import { Shield, Package, User, Play, RotateCcw, Brain, Crown, Trophy, Book, BarChart3, Settings, Pickaxe } from 'lucide-react';
 
-type GameView = 'stats' | 'shop' | 'inventory' | 'research';
-type ModalView = 'achievements' | 'collection' | 'statistics' | 'gameMode' | 'pokyegMarket' | 'tutorial' | 'cheats' | 'auth' | 'profile' | null;
+type GameView = 'stats' | 'shop' | 'inventory' | 'research' | 'mining';
+type ModalView = 'achievements' | 'collection' | 'statistics' | 'gameMode' | 'pokyegMarket' | 'tutorial' | 'cheats' | 'resetConfirm' | null;
 
 function App() {
-  const { user, loading: authLoading } = useAuth();
   const {
     gameState,
     isLoading,
@@ -43,12 +40,15 @@ function App() {
     setGameMode,
     toggleCheat,
     generateCheatItem,
+    mineGem,
+    purchaseMiningTool,
   } = useGameState();
 
   const [currentView, setCurrentView] = useState<GameView>('stats');
   const [currentModal, setCurrentModal] = useState<ModalView>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
-  if (authLoading || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -59,8 +59,8 @@ function App() {
     );
   }
 
-  // Show auth modal if user is not signed in
-  if (!user) {
+  // Show welcome screen for new players
+  if (showWelcome && gameState.zone === 1 && gameState.coins === 100) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
         <div className="text-center max-w-md mx-auto">
@@ -74,6 +74,7 @@ function App() {
               <ul className="text-purple-200 text-xs sm:text-sm space-y-1">
                 <li>• Answer trivia questions to defeat enemies</li>
                 <li>• Collect powerful weapons and armor</li>
+                <li>• Mine gems and upgrade your equipment</li>
                 <li>• Unlock achievements and build knowledge streaks</li>
                 <li>• Explore multiple game modes and challenges</li>
                 <li>• Progress through endless zones of adventure</li>
@@ -82,22 +83,17 @@ function App() {
           </div>
           
           <button
-            onClick={() => setCurrentModal('auth')}
+            onClick={() => setShowWelcome(false)}
             className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-indigo-500 transition-all duration-200 flex items-center gap-3 justify-center text-base sm:text-lg"
           >
-            <LogIn className="w-5 h-5 sm:w-6 sm:h-6" />
+            <Play className="w-5 h-5 sm:w-6 sm:h-6" />
             Start Your Adventure
           </button>
           
           <p className="text-gray-400 text-xs sm:text-sm mt-4">
-            Sign in or create an account to begin your journey
+            Begin your journey in the magical world of Hugoland
           </p>
         </div>
-        
-        <AuthModal 
-          isOpen={currentModal === 'auth'} 
-          onClose={() => setCurrentModal(null)} 
-        />
       </div>
     );
   }
@@ -105,6 +101,15 @@ function App() {
   const handleFooterClick = (type: 'tutorial' | 'cheats') => {
     console.log('Footer clicked:', type); // Debug log
     setCurrentModal(type);
+  };
+
+  const handleResetGame = () => {
+    setCurrentModal('resetConfirm');
+  };
+
+  const confirmReset = () => {
+    resetGame();
+    setCurrentModal(null);
   };
 
   const renderCurrentView = () => {
@@ -209,7 +214,7 @@ function App() {
                 </button>
                 
                 <button
-                  onClick={resetGame}
+                  onClick={handleResetGame}
                   className="px-3 sm:px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center gap-2 justify-center text-xs sm:text-sm"
                 >
                   <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -241,6 +246,15 @@ function App() {
             coins={gameState.coins}
             onUpgradeResearch={upgradeResearch}
             isPremium={gameState.isPremium}
+          />
+        );
+      case 'mining':
+        return (
+          <Mining
+            mining={gameState.mining}
+            gems={gameState.gems}
+            onMineGem={mineGem}
+            onPurchaseTool={purchaseMiningTool}
           />
         );
       default:
@@ -304,19 +318,47 @@ function App() {
             onClose={() => setCurrentModal(null)}
           />
         );
-      case 'auth':
+      case 'resetConfirm':
         return (
-          <AuthModal
-            isOpen={true}
-            onClose={() => setCurrentModal(null)}
-          />
-        );
-      case 'profile':
-        return (
-          <UserProfile
-            isOpen={true}
-            onClose={() => setCurrentModal(null)}
-          />
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-red-900 to-gray-900 p-6 rounded-lg border border-red-500/50 max-w-md w-full">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <RotateCcw className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-white font-bold text-xl mb-4">Reset Game?</h2>
+                <p className="text-gray-300 text-sm mb-6">
+                  Are you sure you want to reset your game? This will permanently delete all your progress, including:
+                </p>
+                <div className="bg-black/30 p-3 rounded-lg mb-6 text-left">
+                  <ul className="text-red-300 text-sm space-y-1">
+                    <li>• All coins and gems</li>
+                    <li>• All weapons and armor</li>
+                    <li>• Zone progress and achievements</li>
+                    <li>• Research levels and statistics</li>
+                    <li>• Collection book progress</li>
+                  </ul>
+                </div>
+                <p className="text-red-400 font-bold text-sm mb-6">
+                  This action cannot be undone!
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setCurrentModal(null)}
+                    className="flex-1 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmReset}
+                    className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors font-bold"
+                  >
+                    Reset Game
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         );
       default:
         return null;
@@ -354,17 +396,6 @@ function App() {
                 <Crown className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400 animate-pulse" />
               )}
             </div>
-            
-            {/* User Profile Button */}
-            <button
-              onClick={() => setCurrentModal('profile')}
-              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-purple-700 hover:bg-purple-600 rounded-lg transition-colors"
-            >
-              <User className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-              <span className="text-white text-xs sm:text-sm font-semibold hidden sm:inline">
-                {user.email?.split('@')[0]}
-              </span>
-            </button>
           </div>
           
           {/* Quick Stats Bar */}
@@ -401,6 +432,7 @@ function App() {
               { id: 'research', label: 'Research', icon: Brain },
               { id: 'shop', label: 'Shop', icon: Package },
               { id: 'inventory', label: 'Inventory', icon: Shield },
+              { id: 'mining', label: 'Mining', icon: Pickaxe },
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

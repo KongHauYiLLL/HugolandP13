@@ -1,12 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { GameState, PlayerStats, Inventory, Enemy, Weapon, Armor, ChestReward, Research, Achievement, CollectionBook, KnowledgeStreak, GameMode, Statistics, PowerSkills, CheatSettings } from '../types/game';
+import { GameState, PlayerStats, Inventory, Enemy, Weapon, Armor, ChestReward, Research, Achievement, CollectionBook, KnowledgeStreak, GameMode, Statistics, PowerSkills, CheatSettings, Mining } from '../types/game';
 import { generateWeapon, generateArmor, generateEnemy, generateMythicalWeapon, generateMythicalArmor, calculateResearchBonus, calculateResearchCost } from '../utils/gameUtils';
 import { checkAchievements, initializeAchievements } from '../utils/achievements';
-import { useAnalytics } from './useAnalytics';
-import { useAuth } from './useAuth';
 import AsyncStorage from '../utils/storage';
 
-const STORAGE_KEY_PREFIX = 'hugoland_game_state_';
+const STORAGE_KEY = 'hugoland_game_state';
 
 const initialPlayerStats: PlayerStats = {
   hp: 200,
@@ -94,6 +92,17 @@ const initialCheats: CheatSettings = {
   obtainAnyItem: false,
 };
 
+const initialMining: Mining = {
+  efficiency: 1,
+  tools: {
+    basic_pickaxe: false,
+    steel_pickaxe: false,
+    diamond_pickaxe: false,
+    mythical_pickaxe: false,
+  },
+  totalGemsMined: 0,
+};
+
 const initialGameState: GameState = {
   coins: 100,
   gems: 0,
@@ -112,10 +121,10 @@ const initialGameState: GameState = {
   statistics: initialStatistics,
   powerSkills: initialPowerSkills,
   cheats: initialCheats,
+  mining: initialMining,
 };
 
 export const useGameState = () => {
-  const { user } = useAuth();
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [isLoading, setIsLoading] = useState(true);
   const [visualEffects, setVisualEffects] = useState({
@@ -125,15 +134,6 @@ export const useGameState = () => {
     showParticles: false,
     showScreenShake: false,
   });
-
-  // Initialize analytics hook
-  const { updateAnalytics } = useAnalytics(gameState);
-
-  // Get user-specific storage key
-  const getStorageKey = useCallback(() => {
-    if (!user?.id) return null;
-    return `${STORAGE_KEY_PREFIX}${user.id}`;
-  }, [user?.id]);
 
   // Update play time
   useEffect(() => {
@@ -150,22 +150,29 @@ export const useGameState = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Load game state from storage when user changes
+  // AFK gem mining - 2 gems per minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGameState(prev => ({
+        ...prev,
+        gems: prev.gems + 2,
+        statistics: {
+          ...prev.statistics,
+          gemsEarned: prev.statistics.gemsEarned + 2,
+        },
+      }));
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load game state from storage
   useEffect(() => {
     const loadGameState = async () => {
       setIsLoading(true);
       
       try {
-        const storageKey = getStorageKey();
-        
-        if (!storageKey) {
-          // No user logged in, reset to initial state
-          setGameState(initialGameState);
-          setIsLoading(false);
-          return;
-        }
-
-        const savedState = await AsyncStorage.getItem(storageKey);
+        const savedState = await AsyncStorage.getItem(STORAGE_KEY);
         
         if (savedState) {
           const parsedState = JSON.parse(savedState);
@@ -188,9 +195,9 @@ export const useGameState = () => {
             isPremium: parsedState.isPremium || parsedState.zone >= 50,
             powerSkills: parsedState.powerSkills || initialPowerSkills,
             cheats: parsedState.cheats || initialCheats,
+            mining: parsedState.mining || initialMining,
           });
         } else {
-          // No saved state for this user, start fresh
           setGameState({
             ...initialGameState,
             achievements: initializeAchievements(),
@@ -202,7 +209,6 @@ export const useGameState = () => {
         }
       } catch (error) {
         console.error('Error loading game state:', error);
-        // On error, reset to initial state
         setGameState({
           ...initialGameState,
           achievements: initializeAchievements(),
@@ -217,23 +223,20 @@ export const useGameState = () => {
     };
 
     loadGameState();
-  }, [getStorageKey, user?.id]);
+  }, []);
 
-  // Save game state to storage whenever it changes (but only if user is logged in)
+  // Save game state to storage whenever it changes
   useEffect(() => {
-    if (!isLoading && user?.id) {
+    if (!isLoading) {
       const saveGameState = async () => {
         try {
-          const storageKey = getStorageKey();
-          if (!storageKey) return;
-
           const stateToSave = {
             ...gameState,
             currentEnemy: null,
             inCombat: false,
             combatLog: [],
           };
-          await AsyncStorage.setItem(storageKey, JSON.stringify(stateToSave));
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
         } catch (error) {
           console.error('Error saving game state:', error);
         }
@@ -241,7 +244,7 @@ export const useGameState = () => {
 
       saveGameState();
     }
-  }, [gameState, isLoading, user?.id, getStorageKey]);
+  }, [gameState, isLoading]);
 
   const triggerVisualEffect = useCallback((type: 'text' | 'particles' | 'shake', data?: any) => {
     switch (type) {
@@ -459,6 +462,66 @@ export const useGameState = () => {
     console.log('Generate cheat item functionality not implemented yet');
   }, []);
 
+  const mineGem = useCallback((x: number, y: number): boolean => {
+    // Mining logic - returns true if successful
+    setGameState(prev => ({
+      ...prev,
+      gems: prev.gems + 1,
+      mining: {
+        ...prev.mining,
+        totalGemsMined: prev.mining.totalGemsMined + 1,
+      },
+      statistics: {
+        ...prev.statistics,
+        gemsEarned: prev.statistics.gemsEarned + 1,
+      },
+    }));
+
+    triggerVisualEffect('text', { text: '+1 Gem!', color: 'text-purple-400' });
+    return true;
+  }, [triggerVisualEffect]);
+
+  const purchaseMiningTool = useCallback((toolId: string): boolean => {
+    const toolCosts = {
+      basic_pickaxe: 50,
+      steel_pickaxe: 200,
+      diamond_pickaxe: 500,
+      mythical_pickaxe: 1000,
+    };
+
+    const toolEfficiency = {
+      basic_pickaxe: 1,
+      steel_pickaxe: 2,
+      diamond_pickaxe: 3,
+      mythical_pickaxe: 5,
+    };
+
+    const cost = toolCosts[toolId as keyof typeof toolCosts];
+    const efficiency = toolEfficiency[toolId as keyof typeof toolEfficiency];
+
+    setGameState(prev => {
+      if (prev.gems < cost || prev.mining.tools[toolId as keyof typeof prev.mining.tools]) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        gems: prev.gems - cost,
+        mining: {
+          ...prev.mining,
+          efficiency: prev.mining.efficiency + efficiency,
+          tools: {
+            ...prev.mining.tools,
+            [toolId]: true,
+          },
+        },
+      };
+    });
+
+    triggerVisualEffect('text', { text: 'Mining Tool Purchased!', color: 'text-orange-400' });
+    return true;
+  }, [triggerVisualEffect]);
+
   const equipWeapon = useCallback((weapon: Weapon) => {
     setGameState(prev => ({
       ...prev,
@@ -602,13 +665,35 @@ export const useGameState = () => {
   const openChest = useCallback((chestCost: number): ChestReward | null => {
     if (gameState.coins < chestCost && !gameState.cheats.infiniteCoins) return null;
 
-    const numItems = Math.floor(Math.random() * 2) + 2;
-    const bonusGems = Math.floor(Math.random() * 10) + 5;
+    // Improved loot rates - more rare items
+    const numItems = Math.floor(Math.random() * 3) + 2; // 2-4 items
+    const bonusGems = Math.floor(Math.random() * 15) + 10; // 10-24 gems
     const items: (Weapon | Armor)[] = [];
 
     for (let i = 0; i < numItems; i++) {
       const isWeapon = Math.random() < 0.5;
-      const item = isWeapon ? generateWeapon(false) : generateArmor(false);
+      
+      // Better rarity chances based on chest cost
+      let forceRarity: string | undefined;
+      if (chestCost >= 1000) {
+        // Legendary chest - guaranteed legendary or mythical
+        forceRarity = Math.random() < 0.3 ? 'mythical' : 'legendary';
+      } else if (chestCost >= 400) {
+        // Epic chest - guaranteed epic or better
+        const rand = Math.random();
+        if (rand < 0.1) forceRarity = 'mythical';
+        else if (rand < 0.3) forceRarity = 'legendary';
+        else forceRarity = 'epic';
+      } else if (chestCost >= 150) {
+        // Rare chest - guaranteed rare or better
+        const rand = Math.random();
+        if (rand < 0.05) forceRarity = 'mythical';
+        else if (rand < 0.15) forceRarity = 'legendary';
+        else if (rand < 0.4) forceRarity = 'epic';
+        else forceRarity = 'rare';
+      }
+      
+      const item = isWeapon ? generateWeapon(false, forceRarity) : generateArmor(false, forceRarity);
       items.push(item);
       updateCollectionBook(item);
     }
@@ -892,10 +977,7 @@ export const useGameState = () => {
 
   const resetGame = useCallback(async () => {
     try {
-      const storageKey = getStorageKey();
-      if (storageKey) {
-        await AsyncStorage.removeItem(storageKey);
-      }
+      await AsyncStorage.removeItem(STORAGE_KEY);
       
       setGameState({
         ...initialGameState,
@@ -908,7 +990,7 @@ export const useGameState = () => {
     } catch (error) {
       console.error('Error resetting game:', error);
     }
-  }, [getStorageKey]);
+  }, []);
 
   return {
     gameState,
@@ -931,5 +1013,7 @@ export const useGameState = () => {
     toggleCheat,
     generateCheatItem,
     checkAndUnlockAchievements,
+    mineGem,
+    purchaseMiningTool,
   };
 };

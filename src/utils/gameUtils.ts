@@ -23,28 +23,33 @@ const enemyNames = [
   'Abyssal Terror', 'Cosmic Horror', 'Reality Bender', 'Dimension Lord'
 ];
 
-export const generateWeapon = (forceChroma = false): Weapon => {
-  // Chroma items are now disabled
-  const rarities = ['common', 'rare', 'epic', 'legendary'] as const;
-  const weights = [45, 30, 20, 5];
-  const random = Math.random() * 100;
+export const generateWeapon = (forceChroma = false, forceRarity?: string): Weapon => {
+  let rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'mythical';
   
-  let rarity: typeof rarities[number] = 'common';
-  let cumulative = 0;
-  
-  for (let i = 0; i < weights.length; i++) {
-    cumulative += weights[i];
-    if (random <= cumulative) {
-      rarity = rarities[i];
-      break;
+  if (forceRarity) {
+    rarity = forceRarity as any;
+  } else {
+    const rarities = ['common', 'rare', 'epic', 'legendary', 'mythical'] as const;
+    const weights = [40, 30, 20, 8, 2]; // Slightly better rates
+    const random = Math.random() * 100;
+    
+    rarity = 'common';
+    let cumulative = 0;
+    
+    for (let i = 0; i < weights.length; i++) {
+      cumulative += weights[i];
+      if (random <= cumulative) {
+        rarity = rarities[i];
+        break;
+      }
     }
   }
 
   const names = weaponNames[rarity];
   const name = names[Math.floor(Math.random() * names.length)];
   
-  const baseAtkMap = { common: 15, rare: 25, epic: 40, legendary: 60 };
-  const upgradeCostMap = { common: 5, rare: 10, epic: 20, legendary: 40 };
+  const baseAtkMap = { common: 15, rare: 25, epic: 40, legendary: 60, mythical: 100 };
+  const upgradeCostMap = { common: 5, rare: 10, epic: 20, legendary: 40, mythical: 50 };
   const baseAtk = baseAtkMap[rarity] + Math.floor(Math.random() * 10);
   const sellPrice = Math.floor(baseAtk * 2);
 
@@ -79,27 +84,33 @@ export const generateMythicalWeapon = (): Weapon => {
   };
 };
 
-export const generateArmor = (forceChroma = false): Armor => {
-  const rarities = ['common', 'rare', 'epic', 'legendary'] as const;
-  const weights = [45, 30, 20, 5];
-  const random = Math.random() * 100;
+export const generateArmor = (forceChroma = false, forceRarity?: string): Armor => {
+  let rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'mythical';
   
-  let rarity: typeof rarities[number] = 'common';
-  let cumulative = 0;
-  
-  for (let i = 0; i < weights.length; i++) {
-    cumulative += weights[i];
-    if (random <= cumulative) {
-      rarity = rarities[i];
-      break;
+  if (forceRarity) {
+    rarity = forceRarity as any;
+  } else {
+    const rarities = ['common', 'rare', 'epic', 'legendary', 'mythical'] as const;
+    const weights = [40, 30, 20, 8, 2]; // Slightly better rates
+    const random = Math.random() * 100;
+    
+    rarity = 'common';
+    let cumulative = 0;
+    
+    for (let i = 0; i < weights.length; i++) {
+      cumulative += weights[i];
+      if (random <= cumulative) {
+        rarity = rarities[i];
+        break;
+      }
     }
   }
 
   const names = armorNames[rarity];
   const name = names[Math.floor(Math.random() * names.length)];
   
-  const baseDefMap = { common: 8, rare: 15, epic: 25, legendary: 40 };
-  const upgradeCostMap = { common: 5, rare: 10, epic: 20, legendary: 40 };
+  const baseDefMap = { common: 8, rare: 15, epic: 25, legendary: 40, mythical: 70 };
+  const upgradeCostMap = { common: 5, rare: 10, epic: 20, legendary: 40, mythical: 50 };
   const baseDef = baseDefMap[rarity] + Math.floor(Math.random() * 5);
   const sellPrice = Math.floor(baseDef * 3);
 
