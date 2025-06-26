@@ -105,11 +105,6 @@ export const Mining: React.FC<MiningProps> = ({ mining, gems, onMineGem, onPurch
                   className="absolute bottom-0 left-0 right-0 bg-green-500 transition-all duration-300"
                   style={{ height: `${progress}%` }}
                 />
-                <div className="absolute bottom-1 left-1 right-1 text-center">
-                  <span className="text-xs text-white font-bold">
-                    {gemNode.clicks}/{gemNode.maxClicks}
-                  </span>
-                </div>
               </>
             )}
           </div>
