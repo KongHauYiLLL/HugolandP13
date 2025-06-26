@@ -22,7 +22,7 @@ export const Mining: React.FC<MiningProps> = ({ mining, gems, onMineGem, onPurch
   const [showShop, setShowShop] = useState(false);
   const [lastMineTime, setLastMineTime] = useState(0);
 
-  const GRID_SIZE = 8;
+  const GRID_SIZE = 10;
   const MINE_COOLDOWN = 0; // 1 second cooldown between clicks
 
   // Generate new gem node
