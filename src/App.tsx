@@ -138,21 +138,6 @@ function App() {
               gems={gameState.gems}
             />
             
-            {/* AFK Gem Info */}
-            <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-3 sm:p-4 rounded-lg border border-purple-500/50">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-xl sm:text-2xl">💎</span>
-                  <h3 className="text-purple-400 font-bold text-sm sm:text-lg">AFK Gem Mining</h3>
-                </div>
-                <p className="text-white text-xs sm:text-sm">
-                  Earn 2 gems every minute while the game is open!
-                </p>
-                <p className="text-purple-300 text-xs sm:text-sm">
-                  Keep Hugoland running to passively collect gems
-                </p>
-              </div>
-            </div>
             
             {/* Knowledge Streak Display */}
             {gameState.knowledgeStreak.current > 0 && (
